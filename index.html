@@ -660,7 +660,24 @@ function buildChart() {
   const datasets = PROVIDERS.map(p => {
     const data = providerData[p.id];
     const incidents = data?.allIncidents || [];
+const counts = [0, 0, 0]; // default for 3 months
 
+// If this is xAI (Grok) and blocked, use gray placeholder
+if (p.id === 'xai' && data?.error) {
+  return {
+    label: p.name,
+    data: counts,        // zero incidents (or you can put static number)
+    backgroundColor: '#88888833', // gray transparent fill
+    borderColor: '#888888',       // gray line
+    borderWidth: 2,
+    pointBackgroundColor: '#888888',
+    pointRadius: 5,
+    pointHoverRadius: 7,
+    tension: 0.4,
+    fill: true,
+  };
+}
+    
     const counts = [0, 0, 0];
     incidents.forEach(inc => {
       const d = new Date(inc.created_at);
