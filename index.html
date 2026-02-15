@@ -702,28 +702,7 @@ const datasets = PROVIDERS.map(p => {
   };
 });
 
-    const counts = [0, 0, 0];
-    incidents.forEach(inc => {
-      const d = new Date(inc.created_at);
-      const monthsAgo = (now.getFullYear() - d.getFullYear()) * 12 + now.getMonth() - d.getMonth();
-      if (monthsAgo >= 0 && monthsAgo <= monthsBack) counts[monthsBack - monthsAgo]++;
-    });
-
-    return {
-      label: p.name,
-      data: counts,
-      backgroundColor: p.color + '33',
-      borderColor: p.color,
-      borderWidth: 2,
-      pointBackgroundColor: p.color,
-      pointRadius: 5,
-      pointHoverRadius: 7,
-      tension: 0.4,
-      fill: true,
-    };
-  });
-
-  chartInstance = new Chart(ctx, {
+     chartInstance = new Chart(ctx, {
     type: 'line',
     data: { labels: months, datasets },
     options: {
