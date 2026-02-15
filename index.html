@@ -596,8 +596,18 @@ function renderSkeletons() {
 }
 
 async function fetchProvider(p) {
+  // Special handling for xAI / Grok
+  if (p.id === 'xai') {
+    return {
+      status: null,
+      incidents: [],
+      allIncidents: [],
+      error: 'Status page blocked by Cloudflare — visit status.x.ai directly',
+    };
+  }
+
   try {
-    // Use CORS proxy to bypass browser restrictions
+    // Use your Vercel proxy for all other providers
     const proxy = '/api/proxy?url=';
     const res = await fetch(proxy + encodeURIComponent(p.statusUrl), { cache: 'no-store' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -634,7 +644,7 @@ async function fetchProvider(p) {
     };
   }
 }
-
+  
 function buildChart() {
   const ctx = document.getElementById('incidentChart').getContext('2d');
   if (chartInstance) chartInstance.destroy();
