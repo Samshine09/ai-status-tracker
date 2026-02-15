@@ -649,7 +649,7 @@ function buildChart() {
   const ctx = document.getElementById('incidentChart').getContext('2d');
   if (chartInstance) chartInstance.destroy();
 
-  // Build monthly buckets: last 5 months
+  // Build monthly buckets: last 6 months
   const monthsBack = 5; // number of months to display
 const months = [];
 const now = new Date();
