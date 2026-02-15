@@ -6,6 +6,86 @@
   <title>AI Provider Status Tracker</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet" />
   <style>
+  /* Tooltip styling */
+  #tooltip {
+    position: fixed;
+    background: var(--surface);
+    color: var(--text);
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    z-index: 9999;
+    white-space: nowrap;
+  }
+</style>
+
+<div id="tooltip"></div>
+
+<script>
+const tooltip = document.getElementById('tooltip');
+
+function attachSegmentTooltips() {
+  document.querySelectorAll('.uptime-segment').forEach(seg => {
+    seg.addEventListener('mouseenter', (e) => {
+      const date = e.target.dataset.date; // We'll store date in data-date
+      if (!date) return;
+
+      tooltip.textContent = date;
+      tooltip.style.opacity = '1';
+      tooltip.style.transform = 'translate(-50%, -10px)';
+      const rect = e.target.getBoundingClientRect();
+      tooltip.style.left = `${rect.left + rect.width / 2}px`;
+      tooltip.style.top = `${rect.top - 8}px`;
+    });
+
+    seg.addEventListener('mouseleave', () => {
+      tooltip.style.opacity = '0';
+    });
+  });
+}
+
+// Modify your buildUptimeBar function to include data-date
+function buildUptimeBar(incidents) {
+  const days = 90;
+  const now = new Date();
+  const segments = Array(days).fill('ok');
+
+  if (incidents) {
+    incidents.forEach(inc => {
+      const start = new Date(inc.created_at).getTime();
+      const dayIdx = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+      if (dayIdx >= 0 && dayIdx < days) {
+        const impact = inc.impact;
+        if (impact === 'critical') segments[days - 1 - dayIdx] = 'down';
+        else if (impact === 'major' || impact === 'minor') segments[days - 1 - dayIdx] = 'warn';
+      }
+    });
+  }
+
+  return segments
+    .map((s, i) => {
+      const date = new Date();
+      date.setDate(now.getDate() - (days - 1 - i));
+      const formatted = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+      // Store date in data attribute for tooltip
+      return `<div class="uptime-segment ${s}" data-date="${formatted}" style="opacity:0.7"></div>`;
+    })
+    .join('');
+}
+
+// Call this after your cards are rendered
+function refreshSegments() {
+  attachSegmentTooltips();
+}
+
+// After updating cards
+fetchAll().then(() => refreshSegments());    
     :root {
       --bg: #0a0a0f;
       --surface: #12121a;
