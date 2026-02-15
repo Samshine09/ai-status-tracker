@@ -597,7 +597,7 @@ function renderSkeletons() {
 async function fetchProvider(p) {
   try {
     // Use CORS proxy to bypass browser restrictions
-    const proxy = 'https://api.allorigins.win/raw?url=';
+    const proxy = '/api/proxy?url=';
     const res = await fetch(proxy + encodeURIComponent(p.statusUrl), { cache: 'no-store' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const summary = await res.json();
