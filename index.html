@@ -502,9 +502,8 @@ function timeAgo(dateStr) {
 }
 
 function buildUptimeBar(incidents) {
-  // 90 day segments, each = 1 day
   const days = 90;
-  const now = Date.now();
+  const now = new Date();
   const segments = Array(days).fill('ok');
 
   if (incidents) {
@@ -519,13 +518,25 @@ function buildUptimeBar(incidents) {
     });
   }
 
-  return segments.map((s, i) => {
-  const date = new Date(now - (days - 1 - i) * 24 * 60 * 60 * 1000);
-  return `<div class="uptime-segment ${s}" title="${date.toLocaleDateString()}"></div>`;
-}).join('');
+  return segments
+    .map((s, i) => {
+      const date = new Date();
+      date.setDate(now.getDate() - (days - 1 - i));
+      const formatted = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+      // New: compute opacity based on recency (older = lighter)
+      const ageFactor = (i + 1) / days; // 0 = oldest, 1 = newest
+      let baseOpacity = 0.7; 
+      if (s === 'warn') baseOpacity = 0.8;
+      if (s === 'down') baseOpacity = 0.9;
+      const opacity = baseOpacity * ageFactor + 0.3 * (1 - ageFactor); // older = slightly lighter
+
+      return `<div class="uptime-segment ${s}" title="${formatted}" style="opacity:${opacity.toFixed(2)}"></div>`;
+    })
+    .join('');
 }
 
-function renderCard(p, data, error) {
+ function renderCard(p, data, error) {
   const indicator = data?.status?.indicator;
   const cls = error ? 'degraded' : statusClass(indicator);
   const label = error ? 'Fetch Error' : statusLabel(indicator);
